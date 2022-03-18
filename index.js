@@ -6,8 +6,12 @@ const png = require('pngjs').PNG;
 var fs = require('fs');
 
 // Test inputs pointing at Hout Bay.
-const TEST_LAT = -34.0460495;
-const TEST_LON = 18.344531;
+const HB_LAT = -34.0460495;
+const HB_LON = 18.344531;
+
+// Test inputs pointing to Turret Peak.
+const TP_LAT = -32.87282171722992
+const TP_LON = 19.19763384584335;
 
 function getUrl(lat, lon, res) {
   return `https://www.google.com/maps/@${lat},${lon},${res}m/data=!3m1!1e3`;
@@ -20,9 +24,10 @@ function getGisData(lat, lon, res, width, height) {
   const t = geolib.computeDestinationPoint(center, res/2, 0);
 
   // Coordinates of the four corner points.
+  // TODO resample res from url, it changes after ui is deleted.
   const tl = geolib.computeDestinationPoint(t, res/2, 270);
-  const tr = geolib.computeDestinationPoint(tl, res/2, 90);
-  const bl = geolib.computeDestinationPoint(tl, res/2, 180);
+  const tr = geolib.computeDestinationPoint(tl, res, 90);
+  const bl = geolib.computeDestinationPoint(tl, res, 180);
 
   return {
     tiepoint: [0, 0, 0, tl.longitude, tl.latitude, 0],
@@ -90,22 +95,28 @@ async function snapshot(browser, path, lat, lon, res) {
   await hideElement(page, '.app-bottom-content-anchor');
   await hideElement(page, '.scene-footer-container');
 
+  // Reparse the resolution from the url, as hiding the ui changes it.
+  // https://www.google.com/maps/@-34.0460495,18.344531,127m/data=!3m1!1e3
+  //                                                     ^ we want this bit
+  const url = await page.url();
+  const newRes = url.split(',')[2].split('/')[0].slice(0, -1);
+
   // Scrape the screenshot and close the browser page.
   await page.screenshot({ path });
   await page.close();
 
   // Georeference the scraped image by pinning down lat/lon coordinates.
-  await georeference(path, lat, lon, res);
+  await georeference(path, lat, lon, newRes);
 }
 
 (async () => {
   const browser = await puppeteer.launch();
 
   const inputs = [
-    ['outputs/100.png', TEST_LAT, TEST_LON, 100],
-    ['outputs/200.png', TEST_LAT, TEST_LON, 200],
-    ['outputs/400.png', TEST_LAT, TEST_LON, 400],
-    ['outputs/800.png', TEST_LAT, TEST_LON, 800],
+    ['outputs/tp_200.png', TP_LAT, TP_LON, 200],
+    ['outputs/tp_400.png', TP_LAT, TP_LON, 400],
+    ['outputs/tp_800.png', TP_LAT, TP_LON, 800],
+    ['outputs/tp_1600.png', TP_LAT, TP_LON, 1600],
   ];
 
   for (let i = 0; i < inputs.length; i++) {
