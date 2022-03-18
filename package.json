@@ -1,0 +1,23 @@
+{
+  "name": "google-maps-scraper",
+  "version": "1.0.0",
+  "description": "A puppeteer script for scraping satellite imagery off google maps.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "google",
+    "maps",
+    "scraper"
+  ],
+  "author": "Guy Paterson-Jones",
+  "license": "MIT",
+  "dependencies": {
+    "arraybuffer-to-buffer": "^0.0.7",
+    "geolib": "^3.3.3",
+    "geotiff": "^2.0.4",
+    "pngjs": "^6.0.0",
+    "puppeteer": "^13.5.1"
+  }
+}
